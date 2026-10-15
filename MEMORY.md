@@ -76,3 +76,9 @@ Registro de **cambios relevantes**, **problemas encontrados y sus soluciones** y
   rechazado — el token `gh` no tiene el scope `workflow` (necesario para
   subir `.github/workflows/`). Solución: ejecutar `gh auth refresh -s workflow`
   (flujo de dispositivo interactivo) y volver a hacer push.
+
+### 2026-10-15 — Incidencia de publicación resuelta + CI en verde
+- El usuario autorizó el scope `workflow` con `gh auth refresh -h github.com -s workflow`
+  (flujo de dispositivo: se lanzó en segundo plano y se le pasó el código).
+- Push de `main` a `https://github.com/andreu-marbor/sudoku` ✅.
+- Workflow **CI** (run 38694083291) en verde: `npm ci` + `npm run prueba` + `npm run build`.
