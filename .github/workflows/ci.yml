@@ -1,9 +1,7 @@
-# CI: comprueba que el proyecto compila en cada push / PR
+# CI en pull requests (en `main` ya despliega despliegue.yml con pruebas + build)
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 
@@ -12,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Configurar Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -23,7 +21,7 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
-      - name: Pruebas (generador + solver)
+      - name: Pruebas (generador + partida + i18n)
         run: npm run prueba
 
       - name: Build de producción

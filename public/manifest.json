@@ -1,0 +1,30 @@
+{
+  "name": "Sudoku — multilenguaje (es/va/en)",
+  "short_name": "Sudoku",
+  "description": "Sudoku multilenguaje: español, valencià i anglès",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#faf9f7",
+  "theme_color": "#faf9f7",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "./icons/icono-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icono-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

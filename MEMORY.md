@@ -16,7 +16,7 @@ Registro de **cambios relevantes**, **problemas encontrados y sus soluciones** y
 | 3 | Pantallas + i18n (es / ca / en) | ✅ Completada |
 | 4 | Visual, sonido y accesibilidad | ✅ Completada |
 | 5 | Responsive y accesibilidad en móvil | ✅ Completada (mejoras ARIA/teclado/horizontal hechas; **prueba en dispositivo físico pendiente del usuario**) |
-| 6 | PWA + GitHub Pages | ⬜ Pendiente |
+| 6 | PWA + GitHub Pages | ✅ Completada |
 | 7 | Android (TWA con Bubblewrap) | ⬜ Pendiente |
 | 8 | Tarjeta en el portfolio (ES/EN) | ⬜ Pendiente |
 
@@ -188,3 +188,24 @@ Registro de **cambios relevantes**, **problemas encontrados y sus soluciones** y
 - ⚠️ **Pendiente del usuario**: prueba en dispositivo físico (targets táctiles,
   orientaciones, vibration/háptica real).
 - **Verificado**: `npm.cmd run prueba` ✅ y `npm.cmd run build` ✅.
+
+### 2026-10-15 — Fase 6: PWA + GitHub Pages
+- **Iconos**: fuentes SVG propias (`public/icons/icono.svg` con la rejilla
+  3×3 y la diagonal en el color de acento, y `maskable.svg` con el contenido
+  al 55 % para el recorte circular de Android).
+  `scripts/generar-iconos.mjs` (`npm.cmd run iconos`) genera favicon.svg +
+  PNG 192/512/maskable con **sharp** (añadido como devDependency).
+- `public/manifest.json`: PWA instalable (`start_url` y `scope` relativos,
+  standalone, iconos 192/512/maskable).
+- `public/sw.js`: **red con respaldo en caché** — red primero, guarda copia
+  y, sin conexión, sirve la caché; limpia versiones antiguas (`sudoku-v1`).
+  Registrado **solo en producción** desde `main.ts` (no estorba al HMR).
+- `index.html`: manifest, favicon SVG, apple-touch-icon y metas iOS.
+- `.github/workflows/despliegue.yml`: prueba → build → **GitHub Pages** en
+  cada push a `main` (mismo patrón que 3 en raya).
+- `ci.yml` reescrito: corre solo en **pull requests** (en `main` ya
+  despliega `despliegue.yml`) y las acciones pasan a `checkout@v5` /
+  `setup-node@v5` (fin del aviso de deprecación de Node 20).
+- README reescrito con enlaces reales y características.
+- **Verificado**: `npm.cmd run iconos` ✅, `npm.cmd run prueba` ✅ y
+  `npm.cmd run build` ✅.

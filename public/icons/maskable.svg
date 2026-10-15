@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Variante maskable: fondo a sangre y contenido al 55 % centrado
+       (zona segura para el recorte circular de Android). -->
+  <rect width="512" height="512" fill="#faf9f7"/>
+  <g transform="translate(115.2 115.2) scale(0.55)">
+    <rect x="60" y="60" width="124" height="124" rx="18" fill="#457b9d"/>
+    <rect x="194" y="60" width="124" height="124" rx="18" fill="#1a1a1a"/>
+    <rect x="328" y="60" width="124" height="124" rx="18" fill="#1a1a1a"/>
+    <rect x="60" y="194" width="124" height="124" rx="18" fill="#1a1a1a"/>
+    <rect x="194" y="194" width="124" height="124" rx="18" fill="#457b9d"/>
+    <rect x="328" y="194" width="124" height="124" rx="18" fill="#1a1a1a"/>
+    <rect x="60" y="328" width="124" height="124" rx="18" fill="#1a1a1a"/>
+    <rect x="194" y="328" width="124" height="124" rx="18" fill="#1a1a1a"/>
+    <rect x="328" y="328" width="124" height="124" rx="18" fill="#457b9d"/>
+  </g>
+</svg>

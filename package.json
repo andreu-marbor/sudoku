@@ -9,11 +9,13 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "prueba": "npm run prueba:generador && npm run prueba:partida && npm run prueba:i18n",
+    "iconos": "node scripts/generar-iconos.mjs",
     "prueba:generador": "esbuild pruebas/generador.ts --bundle --platform=node --outfile=node_modules/.tmp/generador.mjs --log-level=warning && node node_modules/.tmp/generador.mjs",
     "prueba:partida": "esbuild pruebas/partida.ts --bundle --platform=node --outfile=node_modules/.tmp/partida.mjs --log-level=warning && node node_modules/.tmp/partida.mjs",
     "prueba:i18n": "esbuild pruebas/i18n.ts --bundle --platform=node --outfile=node_modules/.tmp/i18n.mjs --log-level=warning && node node_modules/.tmp/i18n.mjs"
   },
   "devDependencies": {
+    "sharp": "^0.35.5",
     "typescript": "^5.9.0",
     "vite": "^7.1.0"
   }

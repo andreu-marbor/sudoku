@@ -31,6 +31,16 @@ function actualizarTitulo(): void {
 onCambioIdioma(actualizarTitulo);
 actualizarTitulo();
 
+// PWA: registrar el service worker solo en producción (red con respaldo
+// en caché; en dev se omite para no interferir con el HMR)
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch((error) => {
+      console.warn('Service worker no registrado:', error);
+    });
+  });
+}
+
 const CLAVE_PARTIDA = 'partida';
 const CLAVE_MEJORES = 'mejoresTiempos';
 const CLAVE_ERRORES = 'erroresAutomaticos';
