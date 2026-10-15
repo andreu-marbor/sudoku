@@ -5,6 +5,7 @@
    ============================================================ */
 
 import './styles/base.css';
+import './styles/animations.css';
 
 import { generarPuzzle } from './game/generador';
 import {

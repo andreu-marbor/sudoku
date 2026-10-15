@@ -18,10 +18,12 @@ import {
 } from '../game/partida';
 import { candidatosDe, tieneCandidato, tieneNotas } from '../game/notas';
 import { crearCronometro } from '../game/cronometro';
+import { efectos, vibrar, crearBotonSonido, pintarBotonSonido } from '../efectos';
 import { onCambioIdioma, t } from '../i18n';
 import { crearTeclado } from './teclado';
 import { CLAVES_DIFICULTAD } from './menu';
 import { crearSelectorIdioma } from './lang';
+import { lanzarConfeti } from './confeti';
 
 export interface AccionesJuego {
   irAMenu: () => void;
@@ -60,7 +62,7 @@ export function mostrarJuego(
 
       <div class="tablero" role="group" aria-label="${t('game.board')}"></div>
       <div class="teclado-contenedor teclado" aria-label="${t('game.keypad')}"></div>
-      <div class="fila-idioma"></div>
+      <div class="fila-ajustes"><div class="fila-idioma"></div></div>
 
       <div class="superposicion" hidden>
         <div class="tarjeta" role="dialog" aria-modal="true" aria-labelledby="titulo-victoria">
@@ -86,6 +88,10 @@ export function mostrarJuego(
   const botonModo = raiz.querySelector<HTMLButtonElement>('#modo')!;
   const botonComprobar = raiz.querySelector<HTMLButtonElement>('#comprobar')!;
   const capaVictoria = raiz.querySelector<HTMLElement>('.superposicion')!;
+
+  // Botón 🔊/🔇 junto al selector de idioma
+  const botonSonido = crearBotonSonido();
+  raiz.querySelector<HTMLElement>('.fila-ajustes')!.appendChild(botonSonido);
 
   // --- Construcción del tablero (81 casillas) ---
   const celdas: HTMLButtonElement[] = [];
@@ -179,6 +185,7 @@ export function mostrarJuego(
       capaVictoria.querySelector<HTMLButtonElement>('#al-menu')!.textContent = t('result.menu');
     }
     crearSelectorIdioma(raiz.querySelector<HTMLElement>('.fila-idioma')!);
+    pintarBotonSonido(botonSonido);
     pintar();
   }
 
@@ -190,11 +197,30 @@ export function mostrarJuego(
   // --- Escritura / borrado ---
   function tecla(valor: number): void {
     if (completado || seleccion < 0) return;
+    const casilla = seleccion;
     const ok =
       partida.modo === 'notas' && valor !== VACIO
-        ? alternarNota(partida, seleccion, valor)
-        : colocarNumero(partida, seleccion, valor);
+        ? alternarNota(partida, casilla, valor)
+        : colocarNumero(partida, casilla, valor);
     if (!ok) return;
+
+    // Game feel: sonido, háptica y animación de la casilla tocada
+    if (esError(partida, casilla)) {
+      efectos.error();
+      vibrar([25, 45, 25]);
+    } else if (valor === VACIO) {
+      efectos.borrar();
+    } else if (partida.modo === 'notas') {
+      efectos.nota();
+    } else {
+      efectos.escribir();
+      vibrar(12);
+    }
+    const celda = celdas[casilla];
+    celda.classList.remove('recien-escrita');
+    void celda.offsetWidth; // reinicia la animación
+    celda.classList.add('recien-escrita');
+
     pintar();
     guardar();
     if (estaCompletado(partida)) {
@@ -214,6 +240,9 @@ export function mostrarJuego(
       : '';
     capaVictoria.hidden = false;
     capaVictoria.querySelector<HTMLButtonElement>('#otra')!.focus();
+    efectos.Victoria();
+    vibrar(180);
+    lanzarConfeti(raiz);
   }
 
   // --- Conexiones ---
@@ -226,17 +255,20 @@ export function mostrarJuego(
   botonDeshacer.addEventListener('click', () => {
     if (completado) return;
     if (deshacer(partida)) {
+      efectos.ui();
       pintar();
       guardar();
     }
   });
   botonModo.addEventListener('click', () => {
     if (completado) return;
+    efectos.ui();
     alternarModo(partida);
     pintar();
   });
   botonComprobar.addEventListener('click', () => {
     if (completado) return;
+    efectos.ui();
     verificando = true;
     pintar();
   });

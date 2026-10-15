@@ -4,6 +4,7 @@
 
 import { DIFICULTADES, type Dificultad } from '../game/generador';
 import { formatearTiempo } from '../game/partida';
+import { crearBotonSonido } from '../efectos';
 import { onCambioIdioma, t } from '../i18n';
 import { crearSelectorIdioma } from './lang';
 
@@ -69,7 +70,7 @@ export function mostrarMenu(
           <input type="checkbox" id="errores" ${ref.erroresAutomaticos ? 'checked' : ''}>
           ${t('menu.autoErrors')}
         </label>
-        <div class="fila-idioma"></div>
+        <div class="fila-ajustes"><div class="fila-idioma"></div></div>
       </main>
     `;
 
@@ -87,5 +88,6 @@ export function mostrarMenu(
     });
 
     crearSelectorIdioma(raiz.querySelector<HTMLElement>('.fila-idioma')!);
+    raiz.querySelector<HTMLElement>('.fila-ajustes')!.appendChild(crearBotonSonido());
   }
 }

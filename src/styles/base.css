@@ -120,6 +120,14 @@ body {
 
 /* ---------- Selector de idioma (ES · VA · EN) ---------- */
 
+.fila-ajustes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
 .fila-idioma {
   display: flex;
   justify-content: center;

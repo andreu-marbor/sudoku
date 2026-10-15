@@ -14,7 +14,7 @@ Registro de **cambios relevantes**, **problemas encontrados y sus soluciones** y
 | 1 | Núcleo jugable (solver + generador + tablero) | ✅ Completada |
 | 2 | Mecánicas completas (notas, deshacer, cronómetro, dificultades) | ✅ Completada |
 | 3 | Pantallas + i18n (es / ca / en) | ✅ Completada |
-| 4 | Visual, sonido y accesibilidad | ⬜ Pendiente |
+| 4 | Visual, sonido y accesibilidad | ✅ Completada |
 | 5 | Responsive y accesibilidad en móvil | ⬜ Pendiente |
 | 6 | PWA + GitHub Pages | ⬜ Pendiente |
 | 7 | Android (TWA con Bubblewrap) | ⬜ Pendiente |
@@ -143,3 +143,28 @@ Registro de **cambios relevantes**, **problemas encontrados y sus soluciones** y
   activo resaltado con `--acento`).
 - **Verificado**: `npm.cmd run prueba` ✅ (generador + partida + i18n) y
   `npm.cmd run build` ✅.
+
+### 2026-10-15 — Fase 4: visual y "game feel"
+- `src/efectos.ts`: motor de **sonido WebAudio con tonos generados**
+  (cero assets): escribir (Do5), nota (Mi5, triángulo), borrar (Re4),
+  error (graves, cuadrada), clic de UI y **fanfarria de Victoria**
+  (Do–Mi–Sol–Do). `AudioContext` perezoso + `resume()` (política de autoplay
+  móvil). **Vibración háptica** (`navigator.vibrate` con detección de
+  soporte), `prefiereMovimientoReducido()` y **botón 🔊/🔇** persistido en
+  `localStorage` (activo por defecto).
+- `src/ui/confeti.ts`: lluvia de confeti DOM (60 piezas con color, tamaño,
+  deriva, giro y retardo aleatorios); se omite con `prefers-reduced-motion`
+  y se limpia a los 4,6 s.
+- `src/styles/animations.css`: número que **entra con rebote**
+  (`cubic-bezier(0.34,1.56,0.64,1)`), **sacudida** al marcar error, tarjeta
+  de victoria con rebote y caída del confeti — todo anulado bajo
+  `prefers-reduced-motion`.
+- `game.ts`: feedback integrado — error con prioridad (sonido grave +
+  vibración `[25,45,25]`), tono de éxito + vibración corta al escribir,
+  tono distinto en modo notas y al borrar; `efectos.ui()` en deshacer,
+  modo y comprobar; fanfarria + confeti + vibración larga al completar.
+- Fila de ajustes (`.fila-ajustes`): selector de idioma **y** botón de
+  sonido, en menú y en partida.
+- Nueva clave `sound.label` (27 claves por idioma; la paridad i18n la cubre
+  la prueba existente).
+- **Verificado**: `npm.cmd run prueba` ✅ (las 3 suites) y `npm.cmd run build` ✅.
