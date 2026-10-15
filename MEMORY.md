@@ -209,3 +209,10 @@ Registro de **cambios relevantes**, **problemas encontrados y sus soluciones** y
 - README reescrito con enlaces reales y características.
 - **Verificado**: `npm.cmd run iconos` ✅, `npm.cmd run prueba` ✅ y
   `npm.cmd run build` ✅.
+- **Incidencia**: el primer despliegue falló porque el workflow corrió antes
+  de habilitar el sitio Pages (`configure-pages` devolvió 404). Solución:
+  habilitar Pages con fuente Actions
+  (`gh api -X POST repos/OWNER/REPO/pages -f build_type=workflow`) y
+  relanzar con `gh workflow run despliegue.yml`.
+- **PWA publicada y verificada**: `https://andreu-marbor.github.io/sudoku/`
+  responde 200, igual que `manifest.json`, `sw.js` e `icons/icono-192.png`.
