@@ -17,8 +17,8 @@ Registro de **cambios relevantes**, **problemas encontrados y sus soluciones** y
 | 4 | Visual, sonido y accesibilidad | ✅ Completada |
 | 5 | Responsive y accesibilidad en móvil | ✅ Completada (mejoras ARIA/teclado/horizontal hechas; **prueba en dispositivo físico pendiente del usuario**) |
 | 6 | PWA + GitHub Pages | ✅ Completada |
-| 7 | Android (TWA con Bubblewrap) | ⬜ Pendiente |
-| 8 | Tarjeta en el portfolio (ES/EN) | ⬜ Pendiente |
+| 7 | Android (TWA con Bubblewrap) | ✅ Completada (APK+AAB en release v1.0.0; **validación en dispositivo físico pendiente del usuario**) |
+| 8 | Tarjeta en el portfolio (ES/EN) | ✅ Completada |
 
 ---
 
@@ -216,3 +216,38 @@ Registro de **cambios relevantes**, **problemas encontrados y sus soluciones** y
   relanzar con `gh workflow run despliegue.yml`.
 - **PWA publicada y verificada**: `https://andreu-marbor.github.io/sudoku/`
   responde 200, igual que `manifest.json`, `sw.js` e `icons/icono-192.png`.
+
+### 2026-10-15 — Fase 7: APK Android vía Bubblewrap (TWA)
+
+- Keystore **reutilizado de 3 en raya** (mismo alias `android`, huella
+  SHA-256 `2F:63:CD:99:…:D2:29`); la contraseña vive fuera del repo en
+  `%USERPROFILE%\.bubblewrap\keystore-pass.txt`.
+- `twa-manifest.json` escrito a mano sobre el patrón validado de 3 en raya:
+  `packageId` `com.andreumarbor.sudoku`, `startUrl`/`fullScopeUrl` `/sudoku/`,
+  `fallbackType: customtabs`, `orientation: any`, version 2 (autoincremento
+  de Bubblewrap).
+- **Incidencia evitada** (lección de 3 en raya): en un build de primera vez
+  **no** crear `manifest-checksum.txt` a mano — sin él, `bubblewrap build`
+  regenera el proyecto Android (el prompt Y/n se responde por stdin).
+- Contraseñas por variables de entorno `BUBBLEWRAP_KEYSTORE_PASSWORD` /
+  `BUBBLEWRAP_KEY_PASSWORD` (sin prompts).
+- `bubblewrap.cmd build` ✅ → `app-release-signed.apk` (1.069.508 bytes) +
+  `app-release-bundle.aab` (1.185.236 bytes).
+- **Release pública v1.0.0**:
+  https://github.com/andreu-marbor/sudoku/releases/tag/v1.0.0 (APK + AAB).
+- Commiteados: `twa-manifest.json`, `manifest-checksum.txt` y el proyecto
+  Android generado. Fuera del repo: `local.properties`, `build/`, `.gradle/`,
+  `*.apk`, `*.aab` y `*.keystore`.
+- ⚠️ **Pendiente del usuario**: instalar la APK en un dispositivo físico y
+  comprobar que abre a pantalla completa (sin barra de URL) gracias al
+  `assetlinks.json`.
+
+### 2026-10-15 — Fase 8: tarjeta en el portfolio
+
+- Nueva tarjeta `<article class="proyecto" id="sudoku">` en `index.html` (ES)
+  y `en.html` (EN), insertada entre 3 en raya y Quiz Historia con la misma
+  estructura que las existentes (etiqueta, resumen, arquitectura, decisiones,
+  nota extra desplegable, etiquetas y enlaces Jugar/Código/APK).
+- `.well-known/assetlinks.json`: añadida la entrada `com.andreumarbor.sudoku`
+  con la **misma huella** que 3 en raya (keystore compartido).
+- Publicado en `https://andreu-marbor.github.io/` (rama `main`).
