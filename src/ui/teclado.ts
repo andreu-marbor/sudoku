@@ -1,9 +1,9 @@
 /* teclado — teclado numérico en pantalla (1-9 y borrar).
-   onTecla(0) significa "borrar". El símbolo ⌫ no necesita traducción. */
+   onTecla(0) significa "borrar". El contenedor debe traer ya sus clases
+   (`.teclado` y `.teclado-contenedor`); aquí no se toca el className. */
 
 export function crearTeclado(contenedor: HTMLElement, onTecla: (valor: number) => void): void {
   contenedor.innerHTML = '';
-  contenedor.className = 'teclado';
 
   for (let v = 1; v <= 9; v++) {
     const tecla = document.createElement('button');

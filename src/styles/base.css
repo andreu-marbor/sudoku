@@ -80,8 +80,42 @@ body {
 .dificultades {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 16px;
   justify-content: center;
+}
+
+.dificultad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.mejor {
+  font-size: 0.8rem;
+  color: var(--text-tenue);
+  font-variant-numeric: tabular-nums;
+}
+
+.boton.grande {
+  min-height: 56px;
+  font-size: 1.1rem;
+}
+
+.ajuste {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 28px;
+  color: var(--text-tenue);
+  cursor: pointer;
+  user-select: none;
+}
+
+.ajuste input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--acento);
 }
 
 /* ---------- Botones ---------- */
@@ -167,6 +201,11 @@ body {
   width: 44px; /* simétrico al botón ←, centra el texto */
 }
 
+.cabecera-botones {
+  display: flex;
+  gap: 2px;
+}
+
 /* ---------- Tablero ---------- */
 
 .tablero {
@@ -231,6 +270,26 @@ body {
   background: var(--seleccion);
 }
 
+/* Notas (modo lápiz): mini rejilla 3×3 dentro de la casilla */
+.celda.con-notas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  font-size: clamp(0.55rem, 2.2vw, 0.8rem);
+  color: var(--nota);
+  font-weight: 400;
+}
+
+.nota {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nota.ausente {
+  visibility: hidden;
+}
+
 /* ---------- Teclado numérico ---------- */
 
 .teclado-contenedor {
@@ -264,6 +323,16 @@ body {
   color: var(--text-tenue);
 }
 
+/* Teclado en modo lápiz: acento de color para no confundirlo */
+.teclado-contenedor.modo-notas .tecla {
+  border-color: var(--nota);
+  color: var(--nota);
+}
+
+.teclado-contenedor.modo-notas .tecla.borrar {
+  border-color: var(--nota);
+}
+
 /* ---------- Superposición de victoria ---------- */
 
 .superposicion {
@@ -291,7 +360,20 @@ body {
 }
 
 .tarjeta h2 {
-  margin: 0 0 24px;
+  margin: 0 0 12px;
+}
+
+.tarjeta-tiempo {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.tarjeta-nota {
+  margin: 0 0 20px;
+  color: var(--ok);
+  font-weight: 600;
+  min-height: 1.2em;
 }
 
 .tarjeta-acciones {

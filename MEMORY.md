@@ -12,7 +12,7 @@ Registro de **cambios relevantes**, **problemas encontrados y sus soluciones** y
 |---|---|---|
 | 0 | Inicialización (andamiaje, docs, repo, CI) | ✅ Completada |
 | 1 | Núcleo jugable (solver + generador + tablero) | ✅ Completada |
-| 2 | Mecánicas completas (notas, deshacer, cronómetro, dificultades) | ⬜ Pendiente |
+| 2 | Mecánicas completas (notas, deshacer, cronómetro, dificultades) | ✅ Completada |
 | 3 | Pantallas + i18n (es / ca / en) | ⬜ Pendiente |
 | 4 | Visual, sonido y accesibilidad | ⬜ Pendiente |
 | 5 | Responsive y accesibilidad en móvil | ⬜ Pendiente |
@@ -82,3 +82,38 @@ Registro de **cambios relevantes**, **problemas encontrados y sus soluciones** y
   (flujo de dispositivo: se lanzó en segundo plano y se le pasó el código).
 - Push de `main` a `https://github.com/andreu-marbor/sudoku` ✅.
 - Workflow **CI** (run 38694083291) en verde: `npm ci` + `npm run prueba` + `npm run build`.
+
+### 2026-10-15 — Fase 2: mecánicas completas
+- `src/persistencia.ts`: acceso **centralizado** a localStorage con tolerancia
+  a errores (modo privado/cuota llena: nunca tirar la partida por no guardar).
+- `src/game/notas.ts`: candidatos (modo lápiz) como **máscara de bits** por
+  casilla — 81 números en vez de 81 arrays.
+- `src/game/cronometro.ts`: cronómetro con pausa (iniciar/pausar/alternar/
+  reiniciar, tick a 500 ms).
+- `src/game/partida.ts`: **máquina de estados sin DOM** (todo testeable):
+  - `colocarNumero` escribe/borra y **limpia el candidato del valor en fila,
+    columna y bloque**; `alternarNota` alterna candidatos.
+  - `deshacer` con pila de jugadas que guarda el estado anterior de lo
+    afectado (valor, notas propias y notas de los pares modificados).
+  - `esError` (contra la solución), `estaCompletado`, `formatearTiempo`.
+  - `validarPartida`: al leer de localStorage descarta datos corruptos
+    (longitudes, rangos, modo/dificultad desconocidos).
+- UI:
+  - **Menú**: «Continuar partida» (si hay guardada), **mejores tiempos** por
+    dificultad y ajuste «Marcar errores automáticamente» (persistido; por
+    defecto activo — el plan lo deja como preferencia).
+  - **Partida**: cabecera con cronómetro, botones **↩ deshacer**, **✏️/🔢**
+    modo números-notas y **✓ comprobar**; el teclado se tiñe en modo lápiz;
+    las notas se pintan como mini rejilla 3×3 dentro de la casilla.
+  - **Pausa automática** al pasar a segundo plano (`visibilitychange`) y
+    guardado al salir (`pagehide`); al completar se borra la partida guardada
+    y se registra el mejor tiempo (el overlay avisa si es **¡Nuevo récord!**).
+  - `main.ts`: el router limpia listeners y cronómetro de la pantalla anterior.
+- **Pruebas**: `pruebas/partida.ts` (`npm.cmd run prueba:partida`) — 51
+  comprobaciones ✅: creación, escritura, limpieza de candidatos, deshacer,
+  notas, modo, errores, Victoria, tiempo y validación de datos corruptos.
+- **Bug corregido**: `crearTeclado` pisaba el `className` del contenedor y el
+  teclado se quedaba sin el ancho fijo; ahora el contenedor trae sus clases y
+  la función no las toca.
+- **Verificado**: `npm.cmd run prueba` ✅ (generador + partida) y
+  `npm.cmd run build` ✅.
