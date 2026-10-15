@@ -13,7 +13,7 @@ Registro de **cambios relevantes**, **problemas encontrados y sus soluciones** y
 | 0 | Inicialización (andamiaje, docs, repo, CI) | ✅ Completada |
 | 1 | Núcleo jugable (solver + generador + tablero) | ✅ Completada |
 | 2 | Mecánicas completas (notas, deshacer, cronómetro, dificultades) | ✅ Completada |
-| 3 | Pantallas + i18n (es / ca / en) | ⬜ Pendiente |
+| 3 | Pantallas + i18n (es / ca / en) | ✅ Completada |
 | 4 | Visual, sonido y accesibilidad | ⬜ Pendiente |
 | 5 | Responsive y accesibilidad en móvil | ⬜ Pendiente |
 | 6 | PWA + GitHub Pages | ⬜ Pendiente |
@@ -116,4 +116,30 @@ Registro de **cambios relevantes**, **problemas encontrados y sus soluciones** y
   teclado se quedaba sin el ancho fijo; ahora el contenedor trae sus clases y
   la función no las toca.
 - **Verificado**: `npm.cmd run prueba` ✅ (generador + partida) y
+  `npm.cmd run build` ✅.
+
+### 2026-10-15 — Fase 3: i18n completo (es · ca · en)
+- `src/i18n/index.ts`: sistema propio — claves planas en inglés, 26 claves ×
+  3 JSON, `t('clave', params)` con sustitución de `{parametros}`,
+  `setLang()` persistente, `aplicarIdiomaInicial()` (localStorage →
+  `navigator.language` → `es`), `onCambioIdioma()` (suscripción de
+  repintado) y actualización del atributo `<html lang>`.
+  - Guardas `typeof document !== 'undefined'`: el mismo módulo funciona en
+    Node para las pruebas.
+- `src/ui/lang.ts`: selector reutilizable **ES · VA · EN** (botones-pastilla
+  con `aria-pressed`, nombre completo en `title` y `aria-label`).
+- `menu.ts`: textos por `t()` + selector de idioma en una fila inferior; se
+  repinta entero al cambiar de idioma (devuelve la baja de la suscripción).
+- `game.ts`: **cambio de idioma en partida sin perder el estado** —
+  `repintarTextos()` actualiza cabecera, aria-labels de las 81 casillas
+  (incluidas notas), teclado, superposición de victoria y selector.
+  `ETIQUETAS_DIFICULTAD` → `CLAVES_DIFICULTAD` (i18n en menú y cabecera).
+- `main.ts`: `aplicarIdiomaInicial()` al arrancar y `document.title` ligado
+  al idioma. `mostrarMenu` ahora devuelve su limpieza (como `mostrarJuego`).
+- **Pruebas**: `pruebas/i18n.ts` (`npm.cmd run prueba:i18n`) — paridad de
+  claves entre los 3 JSON, sin textos vacíos, placeholders `{param}`
+  idénticos por clave, claves críticas y traducciones concretas de comprobación.
+- CSS: `.fila-idioma`, `.selector-idioma` y `.boton-idioma` (targets de 44 px,
+  activo resaltado con `--acento`).
+- **Verificado**: `npm.cmd run prueba` ✅ (generador + partida + i18n) y
   `npm.cmd run build` ✅.

@@ -118,6 +118,39 @@ body {
   accent-color: var(--acento);
 }
 
+/* ---------- Selector de idioma (ES · VA · EN) ---------- */
+
+.fila-idioma {
+  display: flex;
+  justify-content: center;
+}
+
+.selector-idioma {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.boton-idioma {
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  border-radius: var(--radio);
+  background: transparent;
+  color: var(--text-tenue);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.boton-idioma:hover {
+  background: var(--seleccion);
+}
+
+.boton-idioma[aria-pressed='true'] {
+  background: var(--acento);
+  color: var(--panel);
+}
+
 /* ---------- Botones ---------- */
 
 .boton {

@@ -14,10 +14,21 @@ import {
 } from './game/partida';
 import type { Dificultad } from './game/generador';
 import { borrar, guardarJson, guardarTexto, leerJson, leerTexto } from './persistencia';
+import { aplicarIdiomaInicial, onCambioIdioma, t } from './i18n';
 import { mostrarMenu, type OpcionesPartida, type ReferenciaMenu } from './ui/menu';
 import { mostrarJuego } from './ui/game';
 
 const app = document.getElementById('app')!;
+
+// Idioma inicial: preferencia guardada → navegador → 'es'
+aplicarIdiomaInicial();
+
+// El título del documento también cambia de idioma
+function actualizarTitulo(): void {
+  document.title = t('app.title');
+}
+onCambioIdioma(actualizarTitulo);
+actualizarTitulo();
 
 const CLAVE_PARTIDA = 'partida';
 const CLAVE_MEJORES = 'mejoresTiempos';
@@ -56,13 +67,12 @@ function registrarResultado(p: EstadoPartida): boolean {
 
 function irAMenu(): void {
   limpiarActual?.();
-  limpiarActual = null;
   const ref: ReferenciaMenu = {
     hayPartidaGuardada: cargarPartidaGuardada() !== null,
     mejoresTiempos: cargarMejores(),
     erroresAutomaticos: erroresAutomaticos(),
   };
-  mostrarMenu(app, ref, {
+  limpiarActual = mostrarMenu(app, ref, {
     onJugar: irAJuego,
     onContinuar: () => {
       const guardada = cargarPartidaGuardada();

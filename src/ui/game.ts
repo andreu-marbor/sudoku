@@ -1,7 +1,8 @@
 /* game — partida: tablero 9×9, teclado, notas (modo lápiz), deshacer,
    cronómetro con pausa y comprobación de errores.
    El estado vive en EstadoPartida (game/partida.ts); aquí solo se pinta
-   y se traducen gestos en llamadas a esa lógica. */
+   y se traducen gestos en llamadas a esa lógica. Al cambiar de idioma se
+   repintan los textos SIN perder la partida. */
 
 import { filaDe, columnaDe, VACIO } from '../game/solver';
 import {
@@ -17,8 +18,10 @@ import {
 } from '../game/partida';
 import { candidatosDe, tieneCandidato, tieneNotas } from '../game/notas';
 import { crearCronometro } from '../game/cronometro';
+import { onCambioIdioma, t } from '../i18n';
 import { crearTeclado } from './teclado';
-import { ETIQUETAS_DIFICULTAD } from './menu';
+import { CLAVES_DIFICULTAD } from './menu';
+import { crearSelectorIdioma } from './lang';
 
 export interface AccionesJuego {
   irAMenu: () => void;
@@ -28,7 +31,7 @@ export interface AccionesJuego {
   erroresAutomaticos: boolean; // ajuste del menú
 }
 
-/** Devuelve una función de limpieza (listeners globales + cronómetro). */
+/** Devuelve una función de limpieza (listeners + cronómetro + i18n). */
 export function mostrarJuego(
   raiz: HTMLElement,
   partida: EstadoPartida,
@@ -37,44 +40,55 @@ export function mostrarJuego(
   let seleccion = -1;
   let verificando = false; // resultado del botón "comprobar"
   let completado = false;
+  let fueRecord = false;
   let pausadoPorOcultar = false;
 
   raiz.innerHTML = `
     <main class="partida">
       <header class="cabecera">
-        <button type="button" class="boton-icono" id="volver" aria-label="Volver al menú">←</button>
+        <button type="button" class="boton-icono" id="volver" aria-label="${t('game.back')}">←</button>
         <span class="cabecera-dato">
-          <strong>${ETIQUETAS_DIFICULTAD[partida.dificultad]}</strong>
+          <strong id="dificultad">${t(CLAVES_DIFICULTAD[partida.dificultad])}</strong>
           <span class="cabecera-secundario" id="tiempo">${formatearTiempo(partida.tiempoMs)}</span>
         </span>
         <span class="cabecera-botones">
-          <button type="button" class="boton-icono" id="deshacer" aria-label="Deshacer">↩</button>
-          <button type="button" class="boton-icono" id="modo" aria-label="Modo de escritura">✏️</button>
-          <button type="button" class="boton-icono" id="comprobar" aria-label="Comprobar errores">✓</button>
+          <button type="button" class="boton-icono" id="deshacer" aria-label="${t('game.undo')}">↩</button>
+          <button type="button" class="boton-icono" id="modo" aria-label="${t('game.modeNumbers')}">✏️</button>
+          <button type="button" class="boton-icono" id="comprobar" aria-label="${t('game.check')}">✓</button>
         </span>
       </header>
 
-      <div class="tablero" role="group" aria-label="Tablero de sudoku"></div>
-      <div class="teclado-contenedor teclado" aria-label="Teclado numérico"></div>
+      <div class="tablero" role="group" aria-label="${t('game.board')}"></div>
+      <div class="teclado-contenedor teclado" aria-label="${t('game.keypad')}"></div>
+      <div class="fila-idioma"></div>
 
       <div class="superposicion" hidden>
         <div class="tarjeta" role="dialog" aria-modal="true" aria-labelledby="titulo-victoria">
-          <h2 id="titulo-victoria">¡Completado! 🎉</h2>
+          <h2 id="titulo-victoria">${t('result.title')}</h2>
           <p class="tarjeta-tiempo" id="tiempo-final"></p>
           <p class="tarjeta-nota" id="nota-final"></p>
           <div class="tarjeta-acciones">
-            <button type="button" class="boton primario" id="otra">Otra partida</button>
-            <button type="button" class="boton" id="al-menu">Menú</button>
+            <button type="button" class="boton primario" id="otra">${t('result.again')}</button>
+            <button type="button" class="boton" id="al-menu">${t('result.menu')}</button>
           </div>
         </div>
       </div>
     </main>
   `;
 
-  // --- Construcción del tablero (81 casillas) ---
+  // --- Referencias ---
   const tableroEl = raiz.querySelector<HTMLElement>('.tablero')!;
-  const celdas: HTMLButtonElement[] = [];
+  const contTeclado = raiz.querySelector<HTMLElement>('.teclado-contenedor')!;
+  const etiquetaTiempo = raiz.querySelector<HTMLElement>('#tiempo')!;
+  const etiquetaDificultad = raiz.querySelector<HTMLElement>('#dificultad')!;
+  const botonVolver = raiz.querySelector<HTMLButtonElement>('#volver')!;
+  const botonDeshacer = raiz.querySelector<HTMLButtonElement>('#deshacer')!;
+  const botonModo = raiz.querySelector<HTMLButtonElement>('#modo')!;
+  const botonComprobar = raiz.querySelector<HTMLButtonElement>('#comprobar')!;
+  const capaVictoria = raiz.querySelector<HTMLElement>('.superposicion')!;
 
+  // --- Construcción del tablero (81 casillas) ---
+  const celdas: HTMLButtonElement[] = [];
   for (let i = 0; i < partida.tablero.length; i++) {
     const celda = document.createElement('button');
     celda.type = 'button';
@@ -90,17 +104,13 @@ export function mostrarJuego(
     celdas.push(celda);
   }
 
-  const contTeclado = raiz.querySelector<HTMLElement>('.teclado-contenedor')!;
-  const etiquetaTiempo = raiz.querySelector<HTMLElement>('#tiempo')!;
-  const botonModo = raiz.querySelector<HTMLButtonElement>('#modo')!;
-
   // --- Cronómetro (sigue el tiempo en partida.tiempoMs) ---
   const cronometro = crearCronometro((ms) => {
     partida.tiempoMs = ms;
     etiquetaTiempo.textContent = formatearTiempo(ms);
   });
 
-  // --- Pintado completo del estado ---
+  // --- Pintado del estado (casillas, modo y errores) ---
   function pintar(): void {
     const mostrarErrores = acc.erroresAutomaticos || verificando;
 
@@ -129,20 +139,47 @@ export function mostrarJuego(
         celda.textContent = '';
       }
 
-      const ubicacion = `Casilla fila ${filaDe(i) + 1}, columna ${columnaDe(i) + 1}`;
+      const ubicacion = t('game.cell', { fila: filaDe(i) + 1, columna: columnaDe(i) + 1 });
       let etiqueta: string;
       if (v !== VACIO) {
-        etiqueta = `${ubicacion}, ${v}${pista ? ' (pista)' : ''}`;
+        etiqueta = `${ubicacion}, ${v} ${pista ? t('game.given') : ''}`.trim();
       } else if (hayNotas) {
-        etiqueta = `${ubicacion}, notas ${candidatosDe(partida.notas, i).join(' ')}`;
+        etiqueta = `${ubicacion}, ${t('game.notes', { valores: candidatosDe(partida.notas, i).join(' ') })}`;
       } else {
-        etiqueta = `${ubicacion}, vacía`;
+        etiqueta = `${ubicacion}, ${t('game.empty')}`;
       }
       celda.setAttribute('aria-label', etiqueta);
     }
 
     contTeclado.classList.toggle('modo-notas', partida.modo === 'notas');
     botonModo.textContent = partida.modo === 'notas' ? '🔢' : '✏️';
+    botonModo.setAttribute(
+      'aria-label',
+      partida.modo === 'notas' ? t('game.modeNotes') : t('game.modeNumbers'),
+    );
+  }
+
+  /** Repinta solo los textos (no toca el estado de la partida). */
+  function repintarTextos(): void {
+    etiquetaDificultad.textContent = t(CLAVES_DIFICULTAD[partida.dificultad]);
+    botonVolver.setAttribute('aria-label', t('game.back'));
+    botonDeshacer.setAttribute('aria-label', t('game.undo'));
+    botonComprobar.setAttribute('aria-label', t('game.check'));
+    tableroEl.setAttribute('aria-label', t('game.board'));
+    contTeclado.setAttribute('aria-label', t('game.keypad'));
+    if (!capaVictoria.hidden) {
+      capaVictoria.querySelector<HTMLElement>('#titulo-victoria')!.textContent = t('result.title');
+      capaVictoria.querySelector<HTMLElement>('#tiempo-final')!.textContent = t('result.time', {
+        tiempo: formatearTiempo(partida.tiempoMs),
+      });
+      capaVictoria.querySelector<HTMLElement>('#nota-final')!.textContent = fueRecord
+        ? t('result.record')
+        : '';
+      capaVictoria.querySelector<HTMLButtonElement>('#otra')!.textContent = t('result.again');
+      capaVictoria.querySelector<HTMLButtonElement>('#al-menu')!.textContent = t('result.menu');
+    }
+    crearSelectorIdioma(raiz.querySelector<HTMLElement>('.fila-idioma')!);
+    pintar();
   }
 
   // --- Persistencia (nunca al final: la partida completada se borra) ---
@@ -163,28 +200,30 @@ export function mostrarJuego(
     if (estaCompletado(partida)) {
       completado = true;
       cronometro.pausar();
-      const record = acc.alCompletar(partida);
-      mostrarVictoria(record);
+      fueRecord = acc.alCompletar(partida);
+      mostrarVictoria();
     }
   }
 
-  function mostrarVictoria(record: boolean): void {
-    const capa = raiz.querySelector<HTMLElement>('.superposicion')!;
-    capa.querySelector<HTMLElement>('#tiempo-final')!.textContent =
-      `Tiempo: ${formatearTiempo(partida.tiempoMs)}`;
-    capa.querySelector<HTMLElement>('#nota-final')!.textContent = record ? '¡Nuevo récord! 🏆' : '';
-    capa.hidden = false;
-    capa.querySelector<HTMLButtonElement>('#otra')!.focus();
+  function mostrarVictoria(): void {
+    capaVictoria.querySelector<HTMLElement>('#tiempo-final')!.textContent = t('result.time', {
+      tiempo: formatearTiempo(partida.tiempoMs),
+    });
+    capaVictoria.querySelector<HTMLElement>('#nota-final')!.textContent = fueRecord
+      ? t('result.record')
+      : '';
+    capaVictoria.hidden = false;
+    capaVictoria.querySelector<HTMLButtonElement>('#otra')!.focus();
   }
 
   // --- Conexiones ---
   crearTeclado(contTeclado, tecla);
 
-  raiz.querySelector<HTMLButtonElement>('#volver')!.addEventListener('click', () => {
+  botonVolver.addEventListener('click', () => {
     guardar();
     acc.irAMenu();
   });
-  raiz.querySelector<HTMLButtonElement>('#deshacer')!.addEventListener('click', () => {
+  botonDeshacer.addEventListener('click', () => {
     if (completado) return;
     if (deshacer(partida)) {
       pintar();
@@ -196,7 +235,7 @@ export function mostrarJuego(
     alternarModo(partida);
     pintar();
   });
-  raiz.querySelector<HTMLButtonElement>('#comprobar')!.addEventListener('click', () => {
+  botonComprobar.addEventListener('click', () => {
     if (completado) return;
     verificando = true;
     pintar();
@@ -226,13 +265,16 @@ export function mostrarJuego(
     cronometro.destruir();
   }
 
+  const desuscribirIdioma = onCambioIdioma(repintarTextos);
   document.addEventListener('visibilitychange', alOcultar);
   window.addEventListener('pagehide', alSalir);
 
   pintar();
+  crearSelectorIdioma(raiz.querySelector<HTMLElement>('.fila-idioma')!);
   cronometro.reiniciar(partida.tiempoMs, true);
 
   return () => {
+    desuscribirIdioma();
     document.removeEventListener('visibilitychange', alOcultar);
     window.removeEventListener('pagehide', alSalir);
     cronometro.destruir();
