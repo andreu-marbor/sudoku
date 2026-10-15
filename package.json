@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prueba": "npm run prueba:generador",
+    "prueba:generador": "esbuild pruebas/generador.ts --bundle --platform=node --outfile=node_modules/.tmp/generador.mjs --log-level=warning && node node_modules/.tmp/generador.mjs"
   },
   "devDependencies": {
     "typescript": "^5.9.0",

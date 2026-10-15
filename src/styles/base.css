@@ -51,3 +51,252 @@ body {
 #app {
   min-height: 100vh;
 }
+
+/* ---------- Pantalla de inicio ---------- */
+
+.inicio {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+}
+
+.titulo {
+  margin: 0;
+  font-size: clamp(2.4rem, 10vw, 4rem);
+  letter-spacing: 0.04em;
+  font-weight: 800;
+}
+
+.lema {
+  margin: 0 0 16px;
+  color: var(--text-tenue);
+}
+
+.dificultades {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* ---------- Botones ---------- */
+
+.boton {
+  min-height: 44px;
+  padding: 10px 22px;
+  border: 2px solid var(--acento);
+  border-radius: var(--radio);
+  background: var(--panel);
+  color: var(--acento);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+
+.boton:hover {
+  transform: translateY(-2px);
+}
+
+.boton:active {
+  transform: translateY(0);
+}
+
+.boton.primario {
+  background: var(--acento);
+  color: var(--panel);
+}
+
+.boton-icono {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: var(--radio);
+  background: transparent;
+  color: var(--text);
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.boton-icono:hover {
+  background: var(--seleccion);
+}
+
+:focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+}
+
+/* ---------- Partida ---------- */
+
+.partida {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 12px 28px;
+}
+
+.cabecera {
+  width: min(92vw, 480px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cabecera-dato {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.2;
+}
+
+.cabecera-secundario {
+  font-size: 0.85rem;
+  color: var(--text-tenue);
+}
+
+.cabecera-derecha {
+  width: 44px; /* simétrico al botón ←, centra el texto */
+}
+
+/* ---------- Tablero ---------- */
+
+.tablero {
+  width: min(92vw, 480px);
+  aspect-ratio: 1;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  border: 3px solid var(--linea-gruesa);
+  border-radius: 4px;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.celda {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-right: 1px solid var(--linea);
+  border-bottom: 1px solid var(--linea);
+  background: transparent;
+  color: var(--acento);
+  font: inherit;
+  font-size: clamp(1.05rem, 5vw, 1.7rem);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  padding: 0;
+}
+
+.celda.corte-dcho {
+  border-right: 3px solid var(--linea-gruesa);
+}
+
+.celda.corte-abajo {
+  border-bottom: 3px solid var(--linea-gruesa);
+}
+
+/* Última fila / columna: el borde grosor lo pone el contenedor */
+.celda:nth-child(9n) {
+  border-right: none;
+}
+
+.celda:nth-child(n + 73) {
+  border-bottom: none;
+}
+
+.celda.pista {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.celda.jugador {
+  color: var(--acento);
+}
+
+.celda.error {
+  color: var(--error);
+}
+
+.celda.seleccionada {
+  background: var(--seleccion);
+}
+
+/* ---------- Teclado numérico ---------- */
+
+.teclado-contenedor {
+  width: min(92vw, 480px);
+}
+
+.teclado {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.tecla {
+  min-height: 52px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.tecla:hover {
+  background: var(--seleccion);
+}
+
+.tecla.borrar {
+  color: var(--text-tenue);
+}
+
+/* ---------- Superposición de victoria ---------- */
+
+.superposicion {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sombra);
+  backdrop-filter: blur(3px);
+  padding: 24px;
+  z-index: 10;
+}
+
+.superposicion[hidden] {
+  display: none;
+}
+
+.tarjeta {
+  background: var(--panel);
+  border-radius: calc(var(--radio) * 1.6);
+  box-shadow: 0 12px 40px var(--sombra);
+  padding: 32px 40px;
+  text-align: center;
+}
+
+.tarjeta h2 {
+  margin: 0 0 24px;
+}
+
+.tarjeta-acciones {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}

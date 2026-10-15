@@ -1,13 +1,23 @@
+/* ============================================================
+   main.ts — Arranque y router de pantallas
+   Flujo: menú (dificultad) → partida → victoria (superposición)
+   → otra partida o menú.
+   ============================================================ */
+
 import './styles/base.css';
 
-// Arranque del sudoku — Fase 0 (andamiaje).
-// Esta pantalla provisional se sustituye por el menú real en la Fase 1.
-const raiz = document.getElementById('app');
-if (!raiz) throw new Error('Falta el elemento #app en index.html');
+import { mostrarMenu, type OpcionesPartida } from './ui/menu';
+import { mostrarJuego } from './ui/game';
 
-raiz.innerHTML = `
-  <main class="inicio">
-    <h1>Sudoku</h1>
-    <p>Proyecto inicializado — fase 0.</p>
-  </main>
-`;
+const app = document.getElementById('app')!;
+
+// --- Router sencillo ---
+function irAMenu(): void {
+  mostrarMenu(app, irAJuego);
+}
+
+function irAJuego(opciones: OpcionesPartida): void {
+  mostrarJuego(app, opciones, irAMenu);
+}
+
+irAMenu();

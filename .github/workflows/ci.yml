@@ -23,5 +23,8 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
+      - name: Pruebas (generador + solver)
+        run: npm run prueba
+
       - name: Build de producción
         run: npm run build
