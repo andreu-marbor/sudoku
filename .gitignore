@@ -1,0 +1,36 @@
+# Dependencias
+node_modules/
+
+# Build de producción
+dist/
+
+# Salidas temporales de las pruebas
+node_modules/.tmp/
+
+# Editor / sistema
+.vscode/
+*.log
+.DS_Store
+Thumbs.db
+
+# Secrets de Bubblewrap / Android (NO subirlos)
+bubblewrapConfig/
+*.keystore
+*.p12
+*.pepk
+
+# --- Android / Gradle (generado por Bubblewrap: Fase 7) ---
+local.properties
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+*.apks
+*.idsig
+gradle-app.setting
+.cxx/
+
+# Variables locales
+.env
+.env.local

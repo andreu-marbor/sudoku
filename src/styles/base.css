@@ -1,0 +1,53 @@
+/* Variables de tema y estilos base.
+   Regla del proyecto: TODO color, tipografía, espaciado y radio vive en
+   variables CSS — nunca valores fijos en el resto de hojas de estilo.
+   Así los temas (claro/oscuro/futuros) se cambian sin tocar lógica. */
+
+:root {
+  color-scheme: light;
+
+  /* Superficies */
+  --bg: #faf9f7;
+  --panel: #ffffff;
+  --text: #1a1a1a;
+  --text-tenue: #6b7280;
+
+  /* Tablero */
+  --linea: #d8d8d8;
+  --linea-gruesa: #1a1a1a;
+  --seleccion: #dbeafe;
+  --seleccion-numero: #bfdbfe;
+
+  /* Semántica */
+  --acento: #457b9d;
+  --error: #e63946;
+  --ok: #2a9d8f;
+  --nota: #8d99ae;
+
+  /* Efectos */
+  --sombra: rgba(0, 0, 0, 0.12);
+  --radio: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+}
+
+#app {
+  min-height: 100vh;
+}
