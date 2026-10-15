@@ -15,7 +15,7 @@ Registro de **cambios relevantes**, **problemas encontrados y sus soluciones** y
 | 2 | Mecánicas completas (notas, deshacer, cronómetro, dificultades) | ✅ Completada |
 | 3 | Pantallas + i18n (es / ca / en) | ✅ Completada |
 | 4 | Visual, sonido y accesibilidad | ✅ Completada |
-| 5 | Responsive y accesibilidad en móvil | ⬜ Pendiente |
+| 5 | Responsive y accesibilidad en móvil | ✅ Completada (mejoras ARIA/teclado/horizontal hechas; **prueba en dispositivo físico pendiente del usuario**) |
 | 6 | PWA + GitHub Pages | ⬜ Pendiente |
 | 7 | Android (TWA con Bubblewrap) | ⬜ Pendiente |
 | 8 | Tarjeta en el portfolio (ES/EN) | ⬜ Pendiente |
@@ -168,3 +168,23 @@ Registro de **cambios relevantes**, **problemas encontrados y sus soluciones** y
 - Nueva clave `sound.label` (27 claves por idioma; la paridad i18n la cubre
   la prueba existente).
 - **Verificado**: `npm.cmd run prueba` ✅ (las 3 suites) y `npm.cmd run build` ✅.
+
+### 2026-10-15 — Fase 5: responsive y accesibilidad
+- **ARIA grid real**: tablero `role="grid"` con `role="row"` (filas con
+  `display: contents` para no romper el CSS grid) y `role="gridcell"` en las
+  81 casillas.
+- **Roving tabindex**: solo la casilla activa es tabulable (patrón ARIA
+  grid) — Tab ya no recorre 81 botones.
+- **Navegación por teclado**: flechas ↑↓←→ entre casillas, `Home`/`End`
+  para primera/última de la fila, dígitos 1-9 del teclado físico y
+  `Backspace`/`Supr` para borrar. Foco movido a la casilla destino.
+- **Región viva** (`aria-live="polite"`, `.visualmente-oculto`): anuncia lo
+  escrito («Casilla fila 3, columna 5, 7») a los lectores de pantalla.
+- **Horizontal**: con `orientation: landscape` y poca altura, el tablero y el
+  teclado pasan a fila (teclado en rejilla 3×4), cabecera a todo el ancho.
+- **Safe area**: padding inferior con `env(safe-area-inset-bottom)` para la
+  barra de gestos de Android/iOS (`viewport-fit=cover` ya estaba en el meta).
+- Listeners de teclado incluidos en la limpieza de la pantalla.
+- ⚠️ **Pendiente del usuario**: prueba en dispositivo físico (targets táctiles,
+  orientaciones, vibration/háptica real).
+- **Verificado**: `npm.cmd run prueba` ✅ y `npm.cmd run build` ✅.

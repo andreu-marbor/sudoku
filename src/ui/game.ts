@@ -60,7 +60,8 @@ export function mostrarJuego(
         </span>
       </header>
 
-      <div class="tablero" role="group" aria-label="${t('game.board')}"></div>
+      <div class="tablero" role="grid" aria-label="${t('game.board')}"></div>
+      <p class="visualmente-oculto" id="estado" aria-live="polite"></p>
       <div class="teclado-contenedor teclado" aria-label="${t('game.keypad')}"></div>
       <div class="fila-ajustes"><div class="fila-idioma"></div></div>
 
@@ -88,26 +89,35 @@ export function mostrarJuego(
   const botonModo = raiz.querySelector<HTMLButtonElement>('#modo')!;
   const botonComprobar = raiz.querySelector<HTMLButtonElement>('#comprobar')!;
   const capaVictoria = raiz.querySelector<HTMLElement>('.superposicion')!;
+  const etiquetaEstado = raiz.querySelector<HTMLElement>('#estado')!;
 
   // Botón 🔊/🔇 junto al selector de idioma
   const botonSonido = crearBotonSonido();
   raiz.querySelector<HTMLElement>('.fila-ajustes')!.appendChild(botonSonido);
 
-  // --- Construcción del tablero (81 casillas) ---
+  // --- Construcción del tablero: ARIA grid real (grid > row > gridcell) ---
   const celdas: HTMLButtonElement[] = [];
-  for (let i = 0; i < partida.tablero.length; i++) {
-    const celda = document.createElement('button');
-    celda.type = 'button';
-    celda.className = 'celda';
-    if (columnaDe(i) % 3 === 2 && columnaDe(i) !== 8) celda.classList.add('corte-dcho');
-    if (filaDe(i) % 3 === 2 && filaDe(i) !== 8) celda.classList.add('corte-abajo');
-    celda.addEventListener('click', () => {
-      if (completado) return;
-      seleccion = i;
-      pintar();
-    });
-    tableroEl.appendChild(celda);
-    celdas.push(celda);
+  for (let f = 0; f < 9; f++) {
+    const filaEl = document.createElement('div');
+    filaEl.className = 'fila-tablero'; // display: contents — no rompe el grid CSS
+    filaEl.setAttribute('role', 'row');
+    for (let c = 0; c < 9; c++) {
+      const i = f * 9 + c;
+      const celda = document.createElement('button');
+      celda.type = 'button';
+      celda.className = 'celda';
+      celda.setAttribute('role', 'gridcell');
+      if (c % 3 === 2 && c !== 8) celda.classList.add('corte-dcho');
+      if (f % 3 === 2 && f !== 8) celda.classList.add('corte-abajo');
+      celda.addEventListener('click', () => {
+        if (completado) return;
+        seleccion = i;
+        pintar();
+      });
+      filaEl.appendChild(celda);
+      celdas.push(celda);
+    }
+    tableroEl.appendChild(filaEl);
   }
 
   // --- Cronómetro (sigue el tiempo en partida.tiempoMs) ---
@@ -126,6 +136,8 @@ export function mostrarJuego(
       const celda = celdas[i];
       const hayNotas = v === VACIO && tieneNotas(partida.notas, i);
 
+      // Roving tabindex: solo la casilla activa es tabulable (patrón ARIA grid)
+      celda.tabIndex = i === (seleccion < 0 ? 0 : seleccion) ? 0 : -1;
       celda.classList.toggle('pista', pista);
       celda.classList.toggle('jugador', !pista && v !== VACIO);
       celda.classList.toggle('error', mostrarErrores && !pista && esError(partida, i));
@@ -222,6 +234,7 @@ export function mostrarJuego(
     celda.classList.add('recien-escrita');
 
     pintar();
+    etiquetaEstado.textContent = celda.getAttribute('aria-label') ?? '';
     guardar();
     if (estaCompletado(partida)) {
       completado = true;
@@ -278,6 +291,52 @@ export function mostrarJuego(
     acc.irAMenu();
   });
 
+  // --- Teclado físico: flechas entre casillas (patrón ARIA grid) ---
+  function navegar(e: KeyboardEvent): void {
+    if (completado) return;
+    const actual = seleccion < 0 ? 0 : seleccion;
+    let destino: number;
+    switch (e.key) {
+      case 'ArrowLeft':
+        destino = actual % 9 === 0 ? actual : actual - 1;
+        break;
+      case 'ArrowRight':
+        destino = actual % 9 === 8 ? actual : actual + 1;
+        break;
+      case 'ArrowUp':
+        destino = actual < 9 ? actual : actual - 9;
+        break;
+      case 'ArrowDown':
+        destino = actual >= 72 ? actual : actual + 9;
+        break;
+      case 'Home':
+        destino = actual - (actual % 9);
+        break;
+      case 'End':
+        destino = actual - (actual % 9) + 8;
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+    seleccion = destino;
+    pintar();
+    celdas[destino].focus();
+  }
+
+  // Dígitos del teclado físico y borrar con Retroceso/Supr
+  function teclasGlobales(e: KeyboardEvent): void {
+    if (completado) return;
+    if (e.key >= '1' && e.key <= '9') {
+      tecla(Number(e.key));
+    } else if (e.key === 'Backspace' || e.key === 'Delete') {
+      tecla(0);
+    } else {
+      return;
+    }
+    e.preventDefault();
+  }
+
   // --- Pausa automática al pasar a segundo plano + guardado al salir ---
   function alOcultar(): void {
     if (document.hidden) {
@@ -298,6 +357,8 @@ export function mostrarJuego(
   }
 
   const desuscribirIdioma = onCambioIdioma(repintarTextos);
+  tableroEl.addEventListener('keydown', navegar);
+  document.addEventListener('keydown', teclasGlobales);
   document.addEventListener('visibilitychange', alOcultar);
   window.addEventListener('pagehide', alSalir);
 
@@ -307,6 +368,8 @@ export function mostrarJuego(
 
   return () => {
     desuscribirIdioma();
+    tableroEl.removeEventListener('keydown', navegar);
+    document.removeEventListener('keydown', teclasGlobales);
     document.removeEventListener('visibilitychange', alOcultar);
     window.removeEventListener('pagehide', alSalir);
     cronometro.destruir();
